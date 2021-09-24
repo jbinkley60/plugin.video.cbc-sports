@@ -92,7 +92,8 @@ def IFRAME(name,url):
 	smil = get_html(smil_url)
 	contents = BeautifulSoup(smil,'html5lib')
 	stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
-	listitem = xbmcgui.ListItem(name, thumbnailImage = defaultimage)
+	listitem = xbmcgui.ListItem(name)
+	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})	
 	xbmc.Player().play( stream, listitem )
 	sys.exit()
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -105,7 +106,8 @@ def VIDEOS(url):
 	item_dict = jdata
 	count = len(item_dict['entries'])
 	for item in jdata['entries']:
-		title = (jdata['entries'][i]['title']).encode('utf-8').replace('&amp;','&')
+		#title = (jdata['entries'][i]['title']).encode('utf-8').replace('&amp;','&')
+		title = (jdata['entries'][i]['title'])
 		url = jdata['entries'][i]['content'][0]['url']
 		image = jdata['entries'][i]['defaultThumbnailUrl']
 		addDir2(title, url, 7, image);i=i+1
@@ -121,7 +123,8 @@ def GET_STREAM(name,url):
 	if mp4base not in stream:
 		stream = stream
 	xbmc.log('stream:' + str(stream))
-	listitem = xbmcgui.ListItem(name, thumbnailImage = defaultimage)
+	listitem = xbmcgui.ListItem(name)
+	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})	
 	xbmc.Player().play( stream, listitem )
 	sys.exit()
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
