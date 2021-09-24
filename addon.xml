@@ -13,6 +13,10 @@
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <license>GPL 2.0 or Later</license>
+        <assets>
+        <icon>icon.png</icon>
+        <fanart>fanart.jpg</fanart>
+        </assets>
         <summary lang="en">Live Events, Replays, and Highlights from CBC Sports</summary>
         <description lang="en">Get the latest headlines, opinion, and video from CBC Sports.  Watch live events, replays, and highlights.  Region blocked for Canada only.</description>
         <disclaimer lang="en"></disclaimer>
