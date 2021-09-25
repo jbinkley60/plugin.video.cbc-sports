@@ -1,0 +1,57 @@
+# Kodi Media Center language file
+# Addon Name: CBC Sports
+# Addon id: plugin.video.cbc-sports
+# Addon Provider: 
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC Addons\n"
+"Report-Msgid-Bugs-To: support@conceiva.com\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Peter Edens\n"
+"Language-Team: English"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30000"
+msgid "Stream Not Available"
+msgstr ""
+
+msgctxt "#30001"
+msgid "Event Blacked-Out in Your Region."
+msgstr ""
+
+msgctxt "#30002"
+msgid "Connection Timed Out.  Try Again."
+msgstr ""
+
+msgctxt "#30003"
+msgid "Live Schedule"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Highlights"
+msgstr ""
+
+msgctxt "#30005"
+msgid "461602883775"
+msgstr ""
+
+msgctxt "#30006"
+msgid "Most Recent"
+msgstr ""
+
+msgctxt "#30007"
+msgid "461477443878"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Archive"
+msgstr ""
+
+msgctxt "#30009"
+msgid "461088323897"
+msgstr ""

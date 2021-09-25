@@ -36,10 +36,14 @@ plugin = 'CBC Sports'
 
 
 def CATEGORIES():
-	addDir(translation(30003), 'http://www.cbc.ca/sports-content/v11/includes/json/schedules/broadcast_schedule.json', 1, defaultimage)
-	addDir(translation(30004), cbcfeedbase + '461602883775' + cbcfeedpost, 6, defaultimage)
-	addDir(translation(30006), cbcfeedbase + '461477443878' + cbcfeedpost, 6, defaultimage)
-	addDir(translation(30008), cbcfeedbase + '461088323897' + cbcfeedpost, 6, defaultimage)
+	dir30003 = xbmcaddon.Addon().getLocalizedString(30003)
+	dir30004 = xbmcaddon.Addon().getLocalizedString(30004)
+	dir30006 = xbmcaddon.Addon().getLocalizedString(30006)
+	dir30008 = xbmcaddon.Addon().getLocalizedString(30008)
+	addDir(dir30003, 'http://www.cbc.ca/sports-content/v11/includes/json/schedules/broadcast_schedule.json', 1, defaultimage)
+	addDir(dir30004, cbcfeedbase + '461602883775' + cbcfeedpost, 6, defaultimage)
+	addDir(dir30006, cbcfeedbase + '461477443878' + cbcfeedpost, 6, defaultimage)
+	addDir(dir30008, cbcfeedbase + '461088323897' + cbcfeedpost, 6, defaultimage)
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
@@ -200,7 +204,7 @@ def addDir(name, url, mode, iconimage, fanart=False, infoLabels=True):
 	liz.setProperty('IsPlayable', 'true')
 	if not fanart:
 		fanart=defaultfanart
-	liz.setArt({'thumb': "DefaultFolder.png", 'icon': "DefaultFolder.png", 'fanart': fanart})	
+	liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})	
 	ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
 	return ok
 
@@ -212,7 +216,7 @@ def addDir2(name,url,mode,iconimage, fanart=False, infoLabels=False):
 		liz.setInfo( type="Video", infoLabels={ "Title": name } )
 		if not fanart:
 			fanart=defaultfanart
-		liz.setArt({'thumb': "DefaultFolder.png", 'icon': "DefaultFolder.png", 'fanart': fanart})	
+		liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})	
 		ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
 		return ok
 
