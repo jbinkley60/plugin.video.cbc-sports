@@ -54,7 +54,8 @@ def INDEX(url):
 	item_dict = jdata
 	count = len(item_dict['schedule'])
 	for item in jdata['schedule']:
-		title = ((jdata['schedule'][i]['ti']).replace('&amp;','&').encode('ASCII', 'ignore'))
+		#title = ((jdata['schedule'][i]['ti']).replace('&amp;','&').encode('ASCII', 'ignore'))
+		title = (jdata['schedule'][i]['ti'])
 		#title = (title.split('-'))[0]
 		if 'Hockey Night' in title:
 			i = i + 1
