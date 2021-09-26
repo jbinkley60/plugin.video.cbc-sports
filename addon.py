@@ -25,7 +25,7 @@ defaultfanart = 'special://home/addons/plugin.video.cbc-sports/fanart.jpg'
 defaultvideo = 'special://home/addons/plugin.video.cbc-sports/icon.png'
 defaulticon = 'special://home/addons/plugin.video.cbc-sports/icon.png'
 #baseurl = 'http://www.cbc.ca/sports'
-baseurl = 'http://www.cbc.ca/'
+baseurl = 'http://www.cbc.ca'
 basefeed = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?byGuid='
 mp4base = 'http://main.mp4.cbc.ca/prodVideo/sports/'
 cbcfeedbase = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?range=1-10&byCategoryIds='
@@ -70,6 +70,7 @@ def INDEX(url):
 		#xbmc.log('EDATE: ' + str(edate))
 		etime = etime.split(' ',1)[-1].upper().lstrip("0")
 		url = baseurl + jdata['schedule'][i]['url']
+		xbmc.log('Live event URL: ' + str(url), xbmc.LOGDEBUG)
 		image = jdata['schedule'][i]['thumb']
 		if edate == now:
 			title = etime + ' - ' + title
