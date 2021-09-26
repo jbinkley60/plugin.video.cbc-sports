@@ -24,7 +24,8 @@ defaultimage = 'special://home/addons/plugin.video.cbc-sports/icon.png'
 defaultfanart = 'special://home/addons/plugin.video.cbc-sports/fanart.jpg'
 defaultvideo = 'special://home/addons/plugin.video.cbc-sports/icon.png'
 defaulticon = 'special://home/addons/plugin.video.cbc-sports/icon.png'
-baseurl = 'http://www.cbc.ca/sports'
+#baseurl = 'http://www.cbc.ca/sports'
+baseurl = 'http://www.cbc.ca/'
 basefeed = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?byGuid='
 mp4base = 'http://main.mp4.cbc.ca/prodVideo/sports/'
 cbcfeedbase = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?range=1-10&byCategoryIds='
@@ -126,6 +127,7 @@ def GET_STREAM(name,url):
 	contents = BeautifulSoup(smil,'html5lib')
 	stream = (re.compile('src="(.+?)"').findall(str(contents))[0])
 	if mp4base not in stream:
+		#stream = mp4base + stream
 		stream = stream
 	xbmc.log('stream:' + str(stream))
 	listitem = xbmcgui.ListItem(name)
