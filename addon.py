@@ -87,13 +87,18 @@ def IFRAME(name,url):
 	#xbmc.log('url: ' + str(url))
 	#url = 'http://www.cbc.ca/1.6163573'
 	#xbmc.log('CBC Sports url: ' + str(url), xbmc.LOGINFO)
-	data = get_html(url)
+	rdata = get_html(url)
 	#xbmc.log('CBC Sports data: ' + str(data), xbmc.LOGINFO)
 	#try: mediaId = re.compile("mediaId': '(.+?)'").findall(str(data))[0]
-	#except IndexError:               
-	#	xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
-	#	return
-	mediaId = '1953177155736'
+	mdata = str(rdata)
+	try:
+	    startpos = mdata.find('mediaId')
+	    endpos = mdata.find('/', startpos)
+	    mediaId = mdata[startpos+8:endpos-1]
+	except IndexError:             
+		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+		return
+	#mediaId = '1953177155736'
 	furl = basefeed + mediaId
 	#xbmc.log('CBC Sports furl: ' + str(furl), xbmc.LOGINFO)
 	jresponse = urllib.request.urlopen(furl)
