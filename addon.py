@@ -117,10 +117,18 @@ def IFRAME(name,url):
 	except IndexError:
 	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
 	    return	
-	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)
+	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)	
 	listitem = xbmcgui.ListItem(name)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
-	#get_html(stream)
+	req = urllib.request.Request(stream)
+	req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0')
+	response = urllib.request.urlopen(req)
+	code = response.getcode()
+	response.close()
+	xbmc.log('CBC Sports Live Schedule stream return code: ' + str(code), xbmc.LOGDEBUG)
+	if code != 200:
+	    xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+	    return	
 	try:	
 	    xbmc.Player().play( stream, listitem )
 	except:              
