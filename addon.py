@@ -98,8 +98,8 @@ def IFRAME(name,url):
 	    endpos = rdata.find('/', startpos)
 	    mediaId = rdata[startpos+8:endpos-1]
 	except IndexError:             
-		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
-		return
+	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+	    return
 	xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGDEBUG)
 	furl = basefeed + mediaId
 	jresponse = urllib.request.urlopen(furl)
@@ -107,16 +107,16 @@ def IFRAME(name,url):
 	try:
 	    smil_url = jdata['entries'][0]['content'][0]['url']
 	except IndexError:             
-		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
-		return	
+	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+	    return	
 	#xbmc.log('smil_url: ' + str(smil_url))
 	smil = get_html(smil_url)
 	contents = BeautifulSoup(smil,'html5lib')
 	try:
 	    stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
-	except IndexError:             
-		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
-		return	
+	except IndexError:
+	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+	    return	
 	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)
 	listitem = xbmcgui.ListItem(name)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
@@ -124,7 +124,7 @@ def IFRAME(name,url):
 	try:	
 	    xbmc.Player().play( stream, listitem )
 	except:              
-		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+	    xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
 	sys.exit()
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
