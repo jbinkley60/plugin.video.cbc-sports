@@ -58,7 +58,11 @@ def INDEX(url):
 		#title = ((jdata['schedule'][i]['ti']).replace('&amp;','&').encode('ASCII', 'ignore'))
 		title = (jdata['schedule'][i]['ti'])
 		#title = (title.split('-'))[0]
-		if 'Hockey Night' in title:
+		onfirst = (jdata['schedule'][i]['on'][0])
+		#onsecond = (jdata['schedule'][i]['on'][1])
+		#xbmc.log('Live event on: ' + str(onfirst), xbmc.LOGINFO)
+		#if 'Hockey Night' in title:
+		if onfirst == 'tv':
 			i = i + 1
 			continue
 		etime = jdata['schedule'][i]['stt']
@@ -68,9 +72,10 @@ def INDEX(url):
 			i = i + 1
 			continue
 		#xbmc.log('EDATE: ' + str(edate))
-		etime = etime.split(' ',1)[-1].upper().lstrip("0")
+		#etime = etime.split(' ',1)[-1].upper().lstrip("0")
+		etime = etime.split(' ',1)[-1].upper()
 		url = baseurl + jdata['schedule'][i]['url']
-		xbmc.log('Live event URL: ' + str(url), xbmc.LOGINFO)
+		#xbmc.log('Live event URL: ' + str(url), xbmc.LOGINFO)
 		image = jdata['schedule'][i]['thumb']
 		if edate == now:
 			title = etime + ' - ' + title
@@ -85,33 +90,24 @@ def INDEX(url):
 def IFRAME(name,url):
 	#name = (name.split(' - '))[2]
 	#xbmc.log('url: ' + str(url))
-	#url = 'http://www.cbc.ca/1.6163573'
-	#xbmc.log('CBC Sports url: ' + str(url), xbmc.LOGINFO)
-	rdata = get_html(url)
-	#xbmc.log('CBC Sports data: ' + str(data), xbmc.LOGINFO)
+	rdata = str(get_html(url))
 	#try: mediaId = re.compile("mediaId': '(.+?)'").findall(str(data))[0]
-	mdata = str(rdata)
+	#mdata = str(rdata)
 	try:
-	    startpos = mdata.find('mediaId')
-	    endpos = mdata.find('/', startpos)
-	    mediaId = mdata[startpos+8:endpos-1]
+	    startpos = rdata.find('mediaId')
+	    endpos = rdata.find('/', startpos)
+	    mediaId = rdata[startpos+8:endpos-1]
 	except IndexError:             
 		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
 		return
-	#mediaId = '1953177155736'
 	furl = basefeed + mediaId
-	#xbmc.log('CBC Sports furl: ' + str(furl), xbmc.LOGINFO)
 	jresponse = urllib.request.urlopen(furl)
 	jdata = json.load(jresponse)
 	smil_url = jdata['entries'][0]['content'][0]['url']
 	#xbmc.log('smil_url: ' + str(smil_url))
-	#xbmc.log('CBC Sports smil_url: ' + str(smil_url), xbmc.LOGINFO)
 	smil = get_html(smil_url)
 	contents = BeautifulSoup(smil,'html5lib')
 	stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
-	#xbmc.log('CBC Sports stream: ' + str(smil_url), xbmc.LOGINFO)
-	#stream = 'https://www.cbc.ca/player/play/1953177155736'
-	#stream = 'https:\\u002F\\u002Fwww.cbc.ca\\u002Fplayer\\u002Fplay\\u002F1953177155736'
 	listitem = xbmcgui.ListItem(name)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})	
 	xbmc.Player().play( stream, listitem )
