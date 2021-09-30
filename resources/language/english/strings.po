@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#30000"
-msgid "Stream Not Available"
+msgid "Stream Not Available Yet"
 msgstr ""
 
 msgctxt "#30001"
@@ -54,4 +54,8 @@ msgstr ""
 
 msgctxt "#30009"
 msgid "461088323897"
+msgstr ""
+
+msgctxt "#30010"
+msgid "This Event Stream Hasn't Started.  Please check back later."
 msgstr ""

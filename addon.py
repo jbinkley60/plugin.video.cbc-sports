@@ -100,17 +100,31 @@ def IFRAME(name,url):
 	except IndexError:             
 		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
 		return
+	xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGDEBUG)
 	furl = basefeed + mediaId
 	jresponse = urllib.request.urlopen(furl)
 	jdata = json.load(jresponse)
-	smil_url = jdata['entries'][0]['content'][0]['url']
+	try:
+	    smil_url = jdata['entries'][0]['content'][0]['url']
+	except IndexError:             
+		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+		return	
 	#xbmc.log('smil_url: ' + str(smil_url))
 	smil = get_html(smil_url)
 	contents = BeautifulSoup(smil,'html5lib')
-	stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
+	try:
+	    stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
+	except IndexError:             
+		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+		return	
+	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)
 	listitem = xbmcgui.ListItem(name)
-	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})	
-	xbmc.Player().play( stream, listitem )
+	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
+	#get_html(stream)
+	try:	
+	    xbmc.Player().play( stream, listitem )
+	except:              
+		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
 	sys.exit()
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -175,7 +189,8 @@ def get_html(url):
 	try:
 		response = urllib.request.urlopen(req)
 		code = response.getcode()
-		xbmc.log('CODE: ' + str(code))
+		#xbmc.log('CODE: ' + str(code))
+		xbmc.log('CBC Sports Live Schedule stream response code: ' + str(code), xbmc.LOGDEBUG)
 		if code == 403:              
 			xbmcgui.Dialog().notification(name, translation(30001), defaultimage, 5000, False)
 			sys.exit()
@@ -185,7 +200,7 @@ def get_html(url):
 		html = response.read()
 		response.close()
 	except urllib.error.URLError:              
-		xbmcgui.Dialog().notification(name, translation(30002), defaultimage, 5000, False)
+		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
 		sys.exit()	 
 	return html
 

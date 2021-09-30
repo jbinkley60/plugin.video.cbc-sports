@@ -1,4 +1,4 @@
-# CBC Sports Kodi Plugin Matrix version
+# CBC Sports KodiPlugin Matrix version
 An addon for Kodi (XBMC) for Live Events, Replays, and Highlights from CBC Sports
 
 Features:
