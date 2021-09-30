@@ -113,22 +113,23 @@ def IFRAME(name,url):
 	smil = get_html(smil_url)
 	contents = BeautifulSoup(smil,'html5lib')
 	try:
-	    stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
+		stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
 	except IndexError:
-	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
-	    return	
-	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)	
+		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+		return
+	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)
 	listitem = xbmcgui.ListItem(name)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
-	req = urllib.request.Request(stream)
-	req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0')
-	response = urllib.request.urlopen(req)
-	code = response.getcode()
-	response.close()
-	xbmc.log('CBC Sports Live Schedule stream return code: ' + str(code), xbmc.LOGDEBUG)
-	if code != 200:
-	    xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
-	    return	
+	sdata = str(get_html(stream))
+	try:
+	    errfound = sdata.find('An error occurred')
+	except IndexError:
+            xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+            return
+	if errfound > -1:
+		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+		return
+	xbmc.log('CBC Sports Live Schedule stream return data: ' + sdata, xbmc.LOGDEBUG)
 	try:	
 	    xbmc.Player().play( stream, listitem )
 	except:              
