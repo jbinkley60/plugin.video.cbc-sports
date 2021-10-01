@@ -59,3 +59,11 @@ msgstr ""
 msgctxt "#30010"
 msgid "This Event Stream Hasn't Started.  Please check back later."
 msgstr ""
+
+msgctxt "#30011"
+msgid "Refresh"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Go up"
+msgstr ""

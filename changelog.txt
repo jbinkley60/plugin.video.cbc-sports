@@ -1,3 +1,6 @@
+Version 0.0.99
+- Initial Matrix Test Release
+
 Version 0.0.2
 - Workaround for unicode errors
 

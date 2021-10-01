@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import html5lib
 import json
 from datetime import datetime, timedelta as td
+import time
 
 
 now = (str(datetime.utcnow() - td(hours=5)).split(' ')[0]).replace('-','/')
@@ -59,8 +60,6 @@ def INDEX(url):
 		title = (jdata['schedule'][i]['ti'])
 		#title = (title.split('-'))[0]
 		onfirst = (jdata['schedule'][i]['on'][0])
-		#onsecond = (jdata['schedule'][i]['on'][1])
-		#xbmc.log('Live event on: ' + str(onfirst), xbmc.LOGINFO)
 		#if 'Hockey Night' in title:
 		if onfirst == 'tv':
 			i = i + 1
@@ -68,14 +67,16 @@ def INDEX(url):
 		etime = jdata['schedule'][i]['stt']
 		#dtime = (etime.split(' ',1)[-1]).split(' ',1)[0]
 		edate = etime.split(' ',1)[0]
-		if edate < now:
+		t1 = time.strptime(edate, "%m/%d/%Y")
+		t2 = time.strptime(now, "%m/%d/%Y")		
+		if t1 < t2:
 			i = i + 1
 			continue
 		#xbmc.log('EDATE: ' + str(edate))
 		#etime = etime.split(' ',1)[-1].upper().lstrip("0")
 		etime = etime.split(' ',1)[-1].upper()
 		url = baseurl + jdata['schedule'][i]['url']
-		#xbmc.log('Live event URL: ' + str(url), xbmc.LOGINFO)
+		xbmc.log('Live event URL: ' + str(url), xbmc.LOGDEBUG)
 		image = jdata['schedule'][i]['thumb']
 		if edate == now:
 			title = etime + ' - ' + title
@@ -247,15 +248,18 @@ def addDir(name, url, mode, iconimage, fanart=False, infoLabels=True):
 
 
 def addDir2(name,url,mode,iconimage, fanart=False, infoLabels=False):
-		u=sys.argv[0]+"?url="+urllib.parse.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.parse.quote_plus(name)
-		ok=True
-		liz = xbmcgui.ListItem(name)
-		liz.setInfo( type="Video", infoLabels={ "Title": name } )
-		if not fanart:
-			fanart=defaultfanart
-		liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})	
-		ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
-		return ok
+	u=sys.argv[0]+"?url="+urllib.parse.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.parse.quote_plus(name)
+	ok=True
+	liz = xbmcgui.ListItem(name)
+	liz.setInfo( type="Video", infoLabels={ "Title": name } )
+	if not fanart:
+		fanart=defaultfanart
+	liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})
+	menuitem1 = xbmcaddon.Addon().getLocalizedString(30011)
+	menuitem2 = xbmcaddon.Addon().getLocalizedString(30012)
+	liz.addContextMenuItems([ (menuitem1, 'Container.Refresh'), (menuitem2, 'Action(ParentDir)')])	
+	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
+	return ok
 
 
 def unescape(s):
