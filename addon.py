@@ -29,7 +29,7 @@ defaulticon = 'special://home/addons/plugin.video.cbc-sports/icon.png'
 baseurl = 'http://www.cbc.ca'
 basefeed = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?byGuid='
 mp4base = 'http://main.mp4.cbc.ca/prodVideo/sports/'
-cbcfeedbase = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?range=1-10&byCategoryIds='
+cbcfeedbase = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?range=1-50&byCategoryIds='
 cbcfeedpost = '&sort=pubDate|desc'
 pluginhandle = int(sys.argv[1])
 addon_handle = int(sys.argv[1])
@@ -61,10 +61,21 @@ def INDEX(url):
 		#title = (title.split('-'))[0]
 		onfirst = (jdata['schedule'][i]['on'][0])
 		#if 'Hockey Night' in title:
+		xbmc.log('Live event title: ' + str(title), xbmc.LOGDEBUG)
 		if onfirst == 'tv':
 			i = i + 1
 			continue
 		etime = jdata['schedule'][i]['stt']
+		sttime = jdata['schedule'][i]['end']
+		xbmc.log('Live event title: ' + str(i), xbmc.LOGDEBUG)
+		try:
+			starttime = datetime.strptime(etime[:16],'%m/%d/%Y %H:%M')
+			endtime = datetime.strptime(sttime[:16],'%m/%d/%Y %H:%M')
+			iduration = (endtime - starttime).seconds
+		except TypeError:         #  Python bug when trying to do strptime twice
+			starttime = datetime(*(time.strptime(etime[:16],'%m/%d/%Y %H:%M')[0:6]))
+			endtime = datetime(*(time.strptime(sttime[:16],'%m/%d/%Y %H:%M')[0:6]))
+			iduration = (endtime - starttime).seconds
 		#dtime = (etime.split(' ',1)[-1]).split(' ',1)[0]
 		edate = etime.split(' ',1)[0]
 		t1 = time.strptime(edate, "%m/%d/%Y")
@@ -83,7 +94,7 @@ def INDEX(url):
 		else:
 			title = edate + ' - ' + etime + ' - ' + title
 		i=i+1
-		addDir2(title, url, 2, image)
+		addDir2(title, url, iduration, 2, image)
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
@@ -131,6 +142,7 @@ def IFRAME(name,url):
 		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
 		return
 	xbmc.log('CBC Sports Live Schedule stream return data: ' + sdata, xbmc.LOGDEBUG)
+	#stream = 'https://cbcsportshd3-lh.akamaihd.net/i/cbcsportsworld1_1@537301/index_2500_av-b.m3u8?sd=10&rebase=on\n'
 	try:	
 	    xbmc.Player().play( stream, listitem )
 	except:              
@@ -143,6 +155,7 @@ def IFRAME(name,url):
 def VIDEOS(url):
 	jresponse = urllib.request.urlopen(url)
 	jdata = json.load(jresponse);i=0
+	#xbmc.log('CBC Sports Live Schedule stream datas ' + str(jdata), xbmc.LOGINFO)
 	item_dict = jdata
 	count = len(item_dict['entries'])
 	for item in jdata['entries']:
@@ -150,7 +163,13 @@ def VIDEOS(url):
 		title = (jdata['entries'][i]['title'])
 		url = jdata['entries'][i]['content'][0]['url']
 		image = jdata['entries'][i]['defaultThumbnailUrl']
-		addDir2(title, url, 7, image);i=i+1
+		vduration = int(jdata['entries'][i]['content'][0]['duration'])
+		pubDate = jdata['entries'][i]['pubDate']
+		aired = datetime.fromtimestamp(pubDate / 1000).strftime('%m/%d/%Y')
+		plot = jdata['entries'][i]['description']
+		#xbmc.log('CBC Sports Live Schedule stream aired ' + aired, xbmc.LOGINFO)
+		#xbmc.log('CBC Sports Live Schedule stream dplot ' + plot, xbmc.LOGINFO)
+		addDir2(title, url, vduration, 7, image, aired, plot);i=i+1
 	xbmc.log('url:' + str(url))
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 		
@@ -247,17 +266,24 @@ def addDir(name, url, mode, iconimage, fanart=False, infoLabels=True):
 	return ok
 
 
-def addDir2(name,url,mode,iconimage, fanart=False, infoLabels=False):
+def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, fanart=False, infoLabels=False):
 	u=sys.argv[0]+"?url="+urllib.parse.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.parse.quote_plus(name)
 	ok=True
 	liz = xbmcgui.ListItem(name)
-	liz.setInfo( type="Video", infoLabels={ "Title": name } )
+	#liz.setInfo( type="Video", infoLabels={ "Title": name } )
+	plot_text = ''
+	if aired and plot:
+		plot_text = '[COLOR blue]Aired: [/COLOR]' + aired + '\n\n' + '[COLOR blue]Description: [/COLOR]' + plot
+	infoLabels={ "Title": name,
+	             "Duration": duration,
+				 "Plot": plot_text }	
+	liz.setInfo( "video", infoLabels)
 	if not fanart:
 		fanart=defaultfanart
 	liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})
 	menuitem1 = xbmcaddon.Addon().getLocalizedString(30011)
 	menuitem2 = xbmcaddon.Addon().getLocalizedString(30012)
-	liz.addContextMenuItems([ (menuitem1, 'Container.Refresh'), (menuitem2, 'Action(ParentDir)')])	
+	liz.addContextMenuItems([ (menuitem1, 'Container.Refresh'), (menuitem2, 'Action(ParentDir)')])
 	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
 	return ok
 
