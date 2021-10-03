@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 #
-# Written by MetalChris and Jbinkley60
+# Written by MetalChris
 # Released under GPL(v2 or Later)
 
 import xbmcaddon, urllib.request, urllib.parse, urllib.error, xbmcgui, xbmcplugin, urllib.request, urllib.error, urllib.parse, re, sys
@@ -142,7 +142,6 @@ def IFRAME(name,url):
 		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
 		return
 	xbmc.log('CBC Sports Live Schedule stream return data: ' + sdata, xbmc.LOGDEBUG)
-	#stream = 'https://cbcsportshd3-lh.akamaihd.net/i/cbcsportsworld1_1@537301/index_2500_av-b.m3u8?sd=10&rebase=on\n'
 	try:	
 	    xbmc.Player().play( stream, listitem )
 	except:              
@@ -184,8 +183,12 @@ def GET_STREAM(name,url):
 		stream = stream
 	xbmc.log('stream:' + str(stream))
 	listitem = xbmcgui.ListItem(name)
-	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})	
-	xbmc.Player().play( stream, listitem )
+	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
+	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)
+	if stream.find('Unavailable') > -1:
+		xbmcgui.Dialog().notification(name, translation(30013), defaultimage, 6000, False)	
+	else:
+		xbmc.Player().play( stream, listitem )
 	sys.exit()
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
