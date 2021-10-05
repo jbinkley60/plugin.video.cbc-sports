@@ -71,3 +71,31 @@ msgstr ""
 msgctxt "#30013"
 msgid "Stream temporarily unavailable. Please check back later."
 msgstr ""
+
+msgctxt "#30314"
+msgid "Highlights Display Limit"
+msgstr ""
+
+msgctxt "#30315"
+msgid "Most Recent Display Limit"
+msgstr ""
+
+msgctxt "#30316"
+msgid "Archive Display Limit"
+msgstr ""
+
+msgctxt "#30317"
+msgid "Display Limits"
+msgstr ""
+
+msgctxt "#30514"
+msgid "The number of Highlights items to display."
+msgstr ""
+
+msgctxt "#30515"
+msgid "The number of Most Recent items to display."
+msgstr ""
+
+msgctxt "#30516"
+msgid "The number of Archive items to display."
+msgstr ""
