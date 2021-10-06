@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 #
-# Written by MetalChris and JBinkley60
+# Written by MetalChris
 # Released under GPL(v2 or Later)
 
 import xbmcaddon, urllib.request, urllib.parse, urllib.error, xbmcgui, xbmcplugin, urllib.request, urllib.error, urllib.parse, re, sys
@@ -29,7 +29,9 @@ defaulticon = 'special://home/addons/plugin.video.cbc-sports/icon.png'
 baseurl = 'http://www.cbc.ca'
 basefeed = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?byGuid='
 mp4base = 'http://main.mp4.cbc.ca/prodVideo/sports/'
-cbcfeedbase = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?range=1-50&byCategoryIds='
+#cbcfeedbase = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?range=1-50&byCategoryIds='
+cbcfeedbase = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?range=1-'
+cbcfeedbas2 = '&byCategoryIds='
 cbcfeedpost = '&sort=pubDate|desc'
 pluginhandle = int(sys.argv[1])
 addon_handle = int(sys.argv[1])
@@ -42,10 +44,13 @@ def CATEGORIES():
 	dir30004 = xbmcaddon.Addon().getLocalizedString(30004)
 	dir30006 = xbmcaddon.Addon().getLocalizedString(30006)
 	dir30008 = xbmcaddon.Addon().getLocalizedString(30008)
+	hlimit = xbmcaddon.Addon().getSetting('hlimit')
+	mlimit = xbmcaddon.Addon().getSetting('mlimit')
+	alimit = xbmcaddon.Addon().getSetting('alimit')
 	addDir(dir30003, 'http://www.cbc.ca/sports-content/v11/includes/json/schedules/broadcast_schedule.json', 1, defaultimage)
-	addDir(dir30004, cbcfeedbase + '461602883775' + cbcfeedpost, 6, defaultimage)
-	addDir(dir30006, cbcfeedbase + '461477443878' + cbcfeedpost, 6, defaultimage)
-	addDir(dir30008, cbcfeedbase + '461088323897' + cbcfeedpost, 6, defaultimage)
+	addDir(dir30004, cbcfeedbase + hlimit + cbcfeedbas2 + '461602883775' + cbcfeedpost, 6, defaultimage)
+	addDir(dir30006, cbcfeedbase + mlimit + cbcfeedbas2 + '461477443878' + cbcfeedpost, 6, defaultimage)
+	addDir(dir30008, cbcfeedbase + alimit + cbcfeedbas2 + '461088323897' + cbcfeedpost, 6, defaultimage)
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
