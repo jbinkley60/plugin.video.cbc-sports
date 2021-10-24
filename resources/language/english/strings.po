@@ -85,7 +85,11 @@ msgid "Archive Display Limit"
 msgstr ""
 
 msgctxt "#30317"
-msgid "Display Limits"
+msgid "Limits & Logging"
+msgstr ""
+
+msgctxt "#30318"
+msgid "CBC Sports Website Response Logging"
 msgstr ""
 
 msgctxt "#30514"
@@ -98,4 +102,8 @@ msgstr ""
 
 msgctxt "#30516"
 msgid "The number of Archive items to display."
+msgstr ""
+
+msgctxt "#30518"
+msgid "Log responses from CBC Sports website for troubleshooting.  The default is off."
 msgstr ""

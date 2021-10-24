@@ -107,9 +107,15 @@ def INDEX(url):
 def IFRAME(name,url):
 	#name = (name.split(' - '))[2]
 	#xbmc.log('url: ' + str(url))
+	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 	rdata = str(get_html(url))
 	#try: mediaId = re.compile("mediaId': '(.+?)'").findall(str(data))[0]
 	#mdata = str(rdata)
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports Live Feed name: ' + str(name), xbmc.LOGINFO)
+	    xbmc.log('CBC Sports URL: ' + str(url), xbmc.LOGINFO)
+	if cbclog >= 2:
+	    xbmc.log('CBC Sports rdata: ' + str(rdata), xbmc.LOGINFO)
 	try:
 	    startpos = rdata.find('mediaId')
 	    endpos = rdata.find('/', startpos)
@@ -117,15 +123,19 @@ def IFRAME(name,url):
 	except IndexError:             
 	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
 	    return
-	xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGDEBUG)
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGINFO)
 	furl = basefeed + mediaId
 	jresponse = urllib.request.urlopen(furl)
 	jdata = json.load(jresponse)
-	xbmc.log('CBC Sports Live Schedule Playback response: ' + str(jdata), xbmc.LOGDEBUG)
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports Live Schedule Playback response: ' + str(jdata), xbmc.LOGINFO)
 	try:
 	    smil_url = jdata['entries'][0]['content'][0]['url']
 	except IndexError:             
 	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+	    if cbclog >= 1:
+	        xbmc.log('CBC Sports Live Schedule entry count is 0 for event: ' + str(name), xbmc.LOGINFO)
 	    return	
 	#xbmc.log('smil_url: ' + str(smil_url))
 	smil = get_html(smil_url)
@@ -135,7 +145,8 @@ def IFRAME(name,url):
 	except IndexError:
 		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
 		return
-	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGINFO)
 	listitem = xbmcgui.ListItem(name)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
 	sdata = str(get_html(stream))
@@ -147,7 +158,8 @@ def IFRAME(name,url):
 	if errfound > -1:
 		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
 		return
-	xbmc.log('CBC Sports Live Schedule stream return data: ' + sdata, xbmc.LOGDEBUG)
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports Live Schedule stream return data: ' + sdata, xbmc.LOGINFO)
 	try:	
 	    xbmc.Player().play( stream, listitem )
 	except:              
