@@ -125,6 +125,9 @@ def IFRAME(name,url):
 	    return
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGINFO)
+	if mediaId[0:2] == '"}':
+	    xbmcgui.Dialog().notification(name, translation(30519), defaultimage, 5000, False)
+	    return	    
 	furl = basefeed + mediaId
 	jresponse = urllib.request.urlopen(furl)
 	jdata = json.load(jresponse)
@@ -234,7 +237,9 @@ def sanitize(data):
 
 def get_html(url):
 	req = urllib.request.Request(url)
-	req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0')
+	#req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0')
+	#req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:92.0) Gecko/20100101 Firefox/92.0')
+	req.add_header('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59')
 
 	try:
 		response = urllib.request.urlopen(req)

@@ -107,3 +107,7 @@ msgstr ""
 msgctxt "#30518"
 msgid "Log responses from CBC Sports website for troubleshooting.  The default is off."
 msgstr ""
+
+msgctxt "#30519"
+msgid "No mediaId from the CBC Sports website.  Please try again later."
+msgstr ""
