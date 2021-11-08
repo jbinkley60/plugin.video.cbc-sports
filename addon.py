@@ -307,7 +307,7 @@ def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, fanart=Fa
              "Duration": duration,
              "Plot": plot_text }
 	liz.setInfo( "video", infoLabels)	
-		fanart=defaultfanart
+	fanart=defaultfanart
 	liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})
 	menuitem1 = xbmcaddon.Addon().getLocalizedString(30011)
 	menuitem2 = xbmcaddon.Addon().getLocalizedString(30012)
