@@ -175,7 +175,7 @@ def IFRAME(name,url):
 def VIDEOS(url):
 	jresponse = urllib.request.urlopen(url)
 	jdata = json.load(jresponse);i=0
-	#xbmc.log('CBC Sports Live Schedule stream datas ' + str(jdata), xbmc.LOGINFO)
+	#xbmc.log('CBC Sports videos data ' + str(jdata), xbmc.LOGINFO)
 	item_dict = jdata
 	count = len(item_dict['entries'])
 	for item in jdata['entries']:
@@ -185,7 +185,7 @@ def VIDEOS(url):
 		image = jdata['entries'][i]['defaultThumbnailUrl']
 		vduration = int(jdata['entries'][i]['content'][0]['duration'])
 		pubDate = jdata['entries'][i]['pubDate']
-		aired = datetime.fromtimestamp(pubDate / 1000).strftime('%m/%d/%Y')
+		aired = datetime.fromtimestamp(pubDate / 1000).strftime('%Y-%m-%d')
 		plot = jdata['entries'][i]['description']
 		#xbmc.log('CBC Sports Live Schedule stream aired ' + aired, xbmc.LOGINFO)
 		#xbmc.log('CBC Sports Live Schedule stream dplot ' + plot, xbmc.LOGINFO)
@@ -237,9 +237,7 @@ def sanitize(data):
 
 def get_html(url):
 	req = urllib.request.Request(url)
-	#req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0')
-	#req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:92.0) Gecko/20100101 Firefox/92.0')
-	req.add_header('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59')
+	req.add_header('User-Agent','User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:44.0) Gecko/20100101 Firefox/44.0')
 
 	try:
 		response = urllib.request.urlopen(req)
@@ -296,15 +294,19 @@ def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, fanart=Fa
 	u=sys.argv[0]+"?url="+urllib.parse.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.parse.quote_plus(name)
 	ok=True
 	liz = xbmcgui.ListItem(name)
-	#liz.setInfo( type="Video", infoLabels={ "Title": name } )
 	plot_text = ''
-	if aired and plot:
-		plot_text = '[COLOR blue]Aired: [/COLOR]' + aired + '\n\n' + '[COLOR blue]Description: [/COLOR]' + plot
+	if plot:
+	    plot_text = plot
+	aired_text = ''
+	if aired:
+            aired_text = aired
 	infoLabels={ "Title": name,
-	             "Duration": duration,
-				 "Plot": plot_text }	
-	liz.setInfo( "video", infoLabels)
-	if not fanart:
+             "Aired": aired_text,
+             "Year": aired_text.split('-',1)[0],
+             "mediatype": 'episode',
+             "Duration": duration,
+             "Plot": plot_text }
+	liz.setInfo( "video", infoLabels)	
 		fanart=defaultfanart
 	liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})
 	menuitem1 = xbmcaddon.Addon().getLocalizedString(30011)
