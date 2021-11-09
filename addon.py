@@ -21,10 +21,10 @@ _addon_path = _addon.getAddonInfo('path')
 selfAddon = xbmcaddon.Addon(id='plugin.video.cbc-sports')
 translation = selfAddon.getLocalizedString
 
-defaultimage = 'special://home/addons/plugin.video.cbc-sports/icon.png'
-defaultfanart = 'special://home/addons/plugin.video.cbc-sports/fanart.jpg'
-defaultvideo = 'special://home/addons/plugin.video.cbc-sports/icon.png'
-defaulticon = 'special://home/addons/plugin.video.cbc-sports/icon.png'
+defaultimage = 'special://home/addons/plugin.video.cbc-sports/resources/icon.png'
+defaultfanart = 'special://home/addons/plugin.video.cbc-sports/resources/fanart.jpg'
+defaultvideo = 'special://home/addons/plugin.video.cbc-sports/resources/icon.png'
+defaulticon = 'special://home/addons/plugin.video.cbc-sports/resources/icon.png'
 #baseurl = 'http://www.cbc.ca/sports'
 baseurl = 'http://www.cbc.ca'
 basefeed = 'http://tpfeed.cbc.ca/f/ExhSPC/vms_5akSXx4Ng_Zn?byGuid='
@@ -187,9 +187,12 @@ def VIDEOS(url):
 		pubDate = jdata['entries'][i]['pubDate']
 		aired = datetime.fromtimestamp(pubDate / 1000).strftime('%Y-%m-%d')
 		plot = jdata['entries'][i]['description']
+		vheight = int(jdata['entries'][i]['content'][0]['height'])
+		vwidth = int(jdata['entries'][i]['content'][0]['width'])
 		#xbmc.log('CBC Sports Live Schedule stream aired ' + aired, xbmc.LOGINFO)
 		#xbmc.log('CBC Sports Live Schedule stream dplot ' + plot, xbmc.LOGINFO)
-		addDir2(title, url, vduration, 7, image, aired, plot);i=i+1
+		xbmc.log('CBC Sports Video height and width: ' + str(vheight) + ' '  + str(vwidth), xbmc.LOGINFO)
+		addDir2(title, url, vduration, 7, image, aired, plot, vheight, vwidth);i=i+1
 	xbmc.log('url:' + str(url))
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 		
@@ -290,7 +293,7 @@ def addDir(name, url, mode, iconimage, fanart=False, infoLabels=True):
 	return ok
 
 
-def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, fanart=False, infoLabels=False):
+def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, vheight=False, vwidth=False, fanart=False, infoLabels=False):
 	u=sys.argv[0]+"?url="+urllib.parse.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.parse.quote_plus(name)
 	ok=True
 	liz = xbmcgui.ListItem(name)
@@ -309,6 +312,14 @@ def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, fanart=Fa
 	liz.setInfo( "video", infoLabels)	
 	fanart=defaultfanart
 	liz.setArt({'thumb': iconimage, 'icon': iconimage, 'fanart': fanart})
+	if vheight and vwidth:
+		aspect = float(float(vwidth) / float(vheight))
+		video_info = {
+			'aspect': aspect,
+			'width': vwidth,
+			'height': vheight,
+			}
+	liz.addStreamInfo('video', video_info)
 	menuitem1 = xbmcaddon.Addon().getLocalizedString(30011)
 	menuitem2 = xbmcaddon.Addon().getLocalizedString(30012)
 	liz.addContextMenuItems([ (menuitem1, 'Container.Refresh'), (menuitem2, 'Action(ParentDir)')])

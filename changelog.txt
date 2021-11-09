@@ -1,3 +1,7 @@
+Version 1.0.0
+- Added video resolution and aspect infomration
+- standardiuzed language format to new Kodi standards
+
 Version 0.0.2
 - Workaround for unicode errors
 
