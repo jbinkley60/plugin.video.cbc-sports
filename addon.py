@@ -319,7 +319,7 @@ def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, vheight=F
 			'width': vwidth,
 			'height': vheight,
 			}
-	liz.addStreamInfo('video', video_info)
+		liz.addStreamInfo('video', video_info)
 	menuitem1 = xbmcaddon.Addon().getLocalizedString(30011)
 	menuitem2 = xbmcaddon.Addon().getLocalizedString(30012)
 	liz.addContextMenuItems([ (menuitem1, 'Container.Refresh'), (menuitem2, 'Action(ParentDir)')])
