@@ -1,10 +1,6 @@
-Version 1.0.1
--  Added alternate mediaId parsing for Live events
--  Added mediaId validation for primary and secondary parsing
--  Added setting for limiting the number of Live Events displayed
-
 Version 1.0.0
-- Inital Matrix production release
+- Added video resolution and aspect infomration
+- standardiuzed language format to new Kodi standards
 
 Version 0.0.2
 - Workaround for unicode errors
