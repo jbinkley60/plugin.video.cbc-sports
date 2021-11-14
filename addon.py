@@ -37,13 +37,14 @@ pluginhandle = int(sys.argv[1])
 addon_handle = int(sys.argv[1])
 confluence_views = [500,501,502,503,504,508]
 plugin = 'CBC Sports'
+notetime = int(xbmcaddon.Addon().getSetting('notetime')) * 1000
 
 
 def CATEGORIES():
-	dir30003 = xbmcaddon.Addon().getLocalizedString(30003)
-	dir30004 = xbmcaddon.Addon().getLocalizedString(30004)
-	dir30006 = xbmcaddon.Addon().getLocalizedString(30006)
-	dir30008 = xbmcaddon.Addon().getLocalizedString(30008)
+	dir30003 = translation(30003)
+	dir30004 = translation(30004)
+	dir30006 = translation(30006)
+	dir30008 = translation(30008)
 	hlimit = xbmcaddon.Addon().getSetting('hlimit')
 	mlimit = xbmcaddon.Addon().getSetting('mlimit')
 	alimit = xbmcaddon.Addon().getSetting('alimit')
@@ -57,15 +58,18 @@ def CATEGORIES():
 #1
 def INDEX(url):
 	jresponse = urllib.request.urlopen(url)
-	jdata = json.load(jresponse);i=0
+	jdata = json.load(jresponse);i=0;n=0
 	item_dict = jdata
+	llimit = xbmcaddon.Addon().getSetting('llimit')
+	hnight = xbmcaddon.Addon().getSetting('hnight')
 	count = len(item_dict['schedule'])
 	for item in jdata['schedule']:
-		#title = ((jdata['schedule'][i]['ti']).replace('&amp;','&').encode('ASCII', 'ignore'))
 		title = (jdata['schedule'][i]['ti'])
 		#title = (title.split('-'))[0]
 		onfirst = (jdata['schedule'][i]['on'][0])
-		#if 'Hockey Night' in title:
+		if 'Hockey Night' in title and hnight == 'false':
+			i = i + 1
+			continue
 		xbmc.log('Live event title: ' + str(title), xbmc.LOGDEBUG)
 		if onfirst == 'tv':
 			i = i + 1
@@ -88,8 +92,6 @@ def INDEX(url):
 		if t1 < t2:
 			i = i + 1
 			continue
-		#xbmc.log('EDATE: ' + str(edate))
-		#etime = etime.split(' ',1)[-1].upper().lstrip("0")
 		etime = etime.split(' ',1)[-1].upper()
 		url = baseurl + jdata['schedule'][i]['url']
 		xbmc.log('Live event URL: ' + str(url), xbmc.LOGDEBUG)
@@ -98,75 +100,104 @@ def INDEX(url):
 			title = etime + ' - ' + title
 		else:
 			title = edate + ' - ' + etime + ' - ' + title
-		i=i+1
-		addDir2(title, url, iduration, 2, image)
+		i=i+1				# track number of items iterated			
+		if int(llimit) == 0 or n < int(llimit):
+			addDir2(title, url, iduration, 2, image)
+			n = n+1			#  track number of items displayed
+		else:
+			break
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
 #2
 def IFRAME(name,url):
-	#name = (name.split(' - '))[2]
-	#xbmc.log('url: ' + str(url))
 	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
-	rdata = str(get_html(url))
-	#try: mediaId = re.compile("mediaId': '(.+?)'").findall(str(data))[0]
-	#mdata = str(rdata)
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports Live Feed name: ' + str(name), xbmc.LOGINFO)
 	    xbmc.log('CBC Sports URL: ' + str(url), xbmc.LOGINFO)
+	if 'www.cbc.ca/sports' in url:		#  Check if valid URL is posted yet
+	    xbmcgui.Dialog().notification(name, translation(30320), defaultimage, notetime, False)
+	    return  
+	rdata = str(get_html(url))
+	#try: mediaId = re.compile("mediaId': '(.+?)'").findall(str(data))[0]
 	if cbclog >= 2:
 	    xbmc.log('CBC Sports rdata: ' + str(rdata), xbmc.LOGINFO)
-	try:
+
+	try:					# primary mediaId parse
 	    startpos = rdata.find('mediaId')
-	    endpos = rdata.find('/', startpos)
-	    mediaId = rdata[startpos+8:endpos-1]
+	    mediaId = rdata[startpos+8:startpos+21]
 	except IndexError:             
-	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, notetime, False)
 	    return
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGINFO)
-	if mediaId[0:2] == '"}':
-	    xbmcgui.Dialog().notification(name, translation(30519), defaultimage, 5000, False)
-	    return	    
+
+	try:					# primary mediaId verify int
+	    mediaIdint = int(mediaId)
+	except ValueError:			# alternate mediaId parse
+	    altid_start = rdata.find('identifier')
+	    mediaId = rdata[altid_start+13:altid_start+26]
+	    if cbclog >= 1:
+	        xbmc.log('CBC Sports alternate mediaId: ' + mediaId, xbmc.LOGINFO)
+
+	try:					# alternate mediaId verify int
+	    mediaIdint = int(mediaId)
+	except ValueError:
+	    xbmcgui.Dialog().notification(name, translation(30519), defaultimage, notetime, False)
+	    return
+	    
 	furl = basefeed + mediaId
 	jresponse = urllib.request.urlopen(furl)
 	jdata = json.load(jresponse)
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports Live Schedule Playback response: ' + str(jdata), xbmc.LOGINFO)
+
 	try:
 	    smil_url = jdata['entries'][0]['content'][0]['url']
 	except IndexError:             
-	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+	    xbmcgui.Dialog().notification(name, translation(30000), defaultimage, notetime, False)
 	    if cbclog >= 1:
 	        xbmc.log('CBC Sports Live Schedule entry count is 0 for event: ' + str(name), xbmc.LOGINFO)
 	    return	
-	#xbmc.log('smil_url: ' + str(smil_url))
+
 	smil = get_html(smil_url)
 	contents = BeautifulSoup(smil,'html5lib')
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports Live Schedule contents: ' + str(contents), xbmc.LOGINFO)
+					
+	if 'GeoLocationBlocked' in str(contents):		#  Check for blackout
+	    xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
+	    return
+
 	try:
 		stream = (re.compile('video src="(.+?)"').findall(str(contents))[0]).replace('/z/','/i/').replace('manifest.f4m','master.m3u8')
-	except IndexError:
-		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, 5000, False)
+	except IndexError:			#  Check if stream is available
+		xbmcgui.Dialog().notification(name, translation(30000), defaultimage, notetime, False)
 		return
+
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGINFO)
 	listitem = xbmcgui.ListItem(name)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
 	sdata = str(get_html(stream))
+
 	try:
 	    errfound = sdata.find('An error occurred')
 	except IndexError:
-            xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+            xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
             return
+
 	if errfound > -1:
-		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
 		return
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports Live Schedule stream return data: ' + sdata, xbmc.LOGINFO)
+
 	try:	
 	    xbmc.Player().play( stream, listitem )
 	except:              
-	    xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+	    xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
+
 	sys.exit()
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -175,7 +206,7 @@ def IFRAME(name,url):
 def VIDEOS(url):
 	jresponse = urllib.request.urlopen(url)
 	jdata = json.load(jresponse);i=0
-	#xbmc.log('CBC Sports videos data ' + str(jdata), xbmc.LOGINFO)
+	#xbmc.log('CBC Sports videos data ' + str(jdata), xbmc.LOGDEBUG)
 	item_dict = jdata
 	count = len(item_dict['entries'])
 	for item in jdata['entries']:
@@ -199,20 +230,26 @@ def VIDEOS(url):
 
 #7
 def GET_STREAM(name,url):
+	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports GET_STREAM name: ' + str(name), xbmc.LOGINFO)
+	    xbmc.log('CBC Sports URL: ' + str(url), xbmc.LOGINFO)
 	smil = get_html(url)
 	contents = BeautifulSoup(smil,'html5lib')
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports GET_STREAM contents: ' + str(contents), xbmc.LOGINFO)
+	if 'GeoLocationBlocked' in str(contents):		#  Check for blackout
+	    xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
+	    return
 	stream = (re.compile('src="(.+?)"').findall(str(contents))[0])
 	if mp4base not in stream:
 		#stream = mp4base + stream
 		stream = stream
-	xbmc.log('stream:' + str(stream))
 	listitem = xbmcgui.ListItem(name)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
-	xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGDEBUG)
-	if stream.find('Unavailable') > -1:
-		xbmcgui.Dialog().notification(name, translation(30013), defaultimage, 6000, False)	
-	else:
-		xbmc.Player().play( stream, listitem )
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports Live Schedule Playback stream: ' + str(stream), xbmc.LOGINFO)
+	xbmc.Player().play( stream, listitem )
 	sys.exit()
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -245,18 +282,17 @@ def get_html(url):
 	try:
 		response = urllib.request.urlopen(req)
 		code = response.getcode()
-		#xbmc.log('CODE: ' + str(code))
 		xbmc.log('CBC Sports Live Schedule stream response code: ' + str(code), xbmc.LOGDEBUG)
 		if code == 403:              
-			xbmcgui.Dialog().notification(name, translation(30001), defaultimage, 5000, False)
+			xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
 			sys.exit()
 		elif code == 22:              
-			xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 5000, False)
+			xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
 			sys.exit()	    
 		html = response.read()
 		response.close()
 	except urllib.error.URLError:              
-		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, 10000, False)
+		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
 		sys.exit()	 
 	return html
 
@@ -300,6 +336,8 @@ def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, vheight=F
 	plot_text = ''
 	if plot:
 	    plot_text = plot
+	else:
+	    plot_text = name
 	aired_text = ''
 	if aired:
             aired_text = aired
@@ -320,8 +358,8 @@ def addDir2(name,url,duration,mode,iconimage, aired=False, plot=False, vheight=F
 			'height': vheight,
 			}
 		liz.addStreamInfo('video', video_info)
-	menuitem1 = xbmcaddon.Addon().getLocalizedString(30011)
-	menuitem2 = xbmcaddon.Addon().getLocalizedString(30012)
+	menuitem1 = translation(30011)
+	menuitem2 = translation(30012)
 	liz.addContextMenuItems([ (menuitem1, 'Container.Refresh'), (menuitem2, 'Action(ParentDir)')])
 	ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
 	return ok

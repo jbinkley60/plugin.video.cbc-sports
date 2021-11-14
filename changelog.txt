@@ -1,6 +1,12 @@
+Version 1.0.1
+-  Added alternate mediaId parsing for Live events
+-  Added mediaId validation for primary and secondary parsing
+-  Added setting for limiting the number of Live Events displayed
+-  Added detection for geographic blackout of streams
+-  Added setting to adjust notification timeout for live events
+
 Version 1.0.0
-- Added video resolution and aspect infomration
-- standardiuzed language format to new Kodi standards
+- Inital Matrix production release
 
 Version 0.0.2
 - Workaround for unicode errors

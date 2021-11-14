@@ -92,6 +92,22 @@ msgctxt "#30318"
 msgid "CBC Sports Website Response Logging"
 msgstr ""
 
+msgctxt "#30319"
+msgid "Live Schedule Limit"
+msgstr ""
+
+msgctxt "#30320"
+msgid "No URL information yet from the CBC Sports website.  Please try again later."
+msgstr ""
+
+msgctxt "#30321"
+msgid "Display notification time (secs)"
+msgstr ""
+
+msgctxt "#30322"
+msgid "Display Hockey Night Live Events"
+msgstr ""
+
 msgctxt "#30514"
 msgid "The number of Highlights items to display."
 msgstr ""
@@ -110,4 +126,16 @@ msgstr ""
 
 msgctxt "#30519"
 msgid "No mediaId from the CBC Sports website.  Please try again later."
+msgstr ""
+
+msgctxt "#30520"
+msgid "The number of Live Schedule items to display."
+msgstr ""
+
+msgctxt "#30521"
+msgid "The number of seconds live event notification messages will appear.  The default is 3 seconds."
+msgstr ""
+
+msgctxt "#30522"
+msgid "Display Hockey Night in Canada Live Events.  Currently they do not play.  The default is disabled."
 msgstr ""
