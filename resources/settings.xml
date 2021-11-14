@@ -77,6 +77,11 @@
 					<default>false</default>
 					<control type="toggle"/>
 				</setting>
+				<setting id="pubevents" type="boolean" label="30323" help="30523">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
 				<setting id="cbclog" type="string" label="30318" help="30518">
 					<level>0</level>
 					<default>0</default>

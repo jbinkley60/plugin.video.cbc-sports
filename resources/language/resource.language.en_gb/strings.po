@@ -108,6 +108,10 @@ msgctxt "#30322"
 msgid "Display Hockey Night Live Events"
 msgstr ""
 
+msgctxt "#30323"
+msgid "Display Live Events Publish Check"
+msgstr ""
+
 msgctxt "#30514"
 msgid "The number of Highlights items to display."
 msgstr ""
@@ -138,4 +142,8 @@ msgstr ""
 
 msgctxt "#30522"
 msgid "Display Hockey Night in Canada Live Events.  Currently they do not play.  The default is disabled."
+msgstr ""
+
+msgctxt "#30523"
+msgid "Enabling will add [COLOR blue](Published)[/COLOR] to Live Events with published stream information.  The default is disabled."
 msgstr ""

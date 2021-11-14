@@ -62,18 +62,24 @@ def INDEX(url):
 	item_dict = jdata
 	llimit = xbmcaddon.Addon().getSetting('llimit')
 	hnight = xbmcaddon.Addon().getSetting('hnight')
+	pubevents = xbmcaddon.Addon().getSetting('pubevents')
+	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 	count = len(item_dict['schedule'])
 	for item in jdata['schedule']:
 		title = (jdata['schedule'][i]['ti'])
-		#title = (title.split('-'))[0]
+		if cbclog >= 1:
+	    		xbmc.log('CBC Sports Index title: ' + str(title), xbmc.LOGINFO)
+	    		xbmc.log('CBC Sports Index URL: ' + str(url), xbmc.LOGINFO)
 		onfirst = (jdata['schedule'][i]['on'][0])
 		if 'Hockey Night' in title and hnight == 'false':
 			i = i + 1
 			continue
-		xbmc.log('Live event title: ' + str(title), xbmc.LOGDEBUG)
 		if onfirst == 'tv':
 			i = i + 1
 			continue
+		badurl = jdata['schedule'][i]['url']
+		if '/sports' not in badurl and pubevents == 'true':
+			title = title + '  [COLOR blue](Published)[/COLOR]'
 		etime = jdata['schedule'][i]['stt']
 		sttime = jdata['schedule'][i]['end']
 		xbmc.log('Live event title: ' + str(i), xbmc.LOGDEBUG)

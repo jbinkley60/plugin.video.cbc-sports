@@ -5,6 +5,7 @@ Version 1.0.1
 -  Added detection for geographic blackout of streams
 -  Added setting to adjust notification timeout for live events
 -  Added option to not display Hockey Night in Canada Live Events which currently do not work.
+-  Added option to display which Live Events have published stream information. 
 
 Version 1.0.0
 - Inital Matrix production release
