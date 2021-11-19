@@ -68,10 +68,10 @@ def INDEX(url):
 	    		xbmc.log('CBC Sports Index jdata: ' + str(jdata), xbmc.LOGINFO)
 		onfirst = (jdata['schedule'][i]['on'][0])
 		if 'Hockey Night' in title and hnight == 'false':
-			i = i + 1
+			i += 1
 			continue
 		if onfirst == 'tv':
-			i = i + 1
+			i += 1
 			continue
 		badurl = jdata['schedule'][i]['url']
 		if '/sports' not in badurl and pubevents == 'true':
@@ -94,7 +94,7 @@ def INDEX(url):
 		t1 = time.strptime(edate, "%m/%d/%Y")
 		t2 = time.strptime(now, "%m/%d/%Y")		
 		if t1 < t2:
-			i = i + 1
+			i += 1
 			continue
 		etime = etime.split(' ',1)[-1].upper()
 		url = baseurl + jdata['schedule'][i]['url']
@@ -105,7 +105,7 @@ def INDEX(url):
 			title = etime + ' - ' + title
 		else:
 			title = edate + ' - ' + etime + ' - ' + title
-		i=i+1				# track number of items iterated			
+		i += 1				# track number of items iterated			
 		if int(llimit) == 0 or n < int(llimit):
 			addDir2(title, url, iduration, 2, image)
 			n = n+1			#  track number of items displayed
