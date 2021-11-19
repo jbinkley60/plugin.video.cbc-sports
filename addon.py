@@ -1,9 +1,3 @@
-#!/usr/bin/python
-#
-#
-# Written by MetalChris
-# Released under GPL(v2 or Later)
-
 import xbmcaddon, urllib.request, urllib.parse, urllib.error, xbmcgui, xbmcplugin, urllib.request, urllib.error, urllib.parse, re, sys
 from bs4 import BeautifulSoup
 import html5lib
@@ -58,7 +52,7 @@ def CATEGORIES():
 #1
 def INDEX(url):
 	jresponse = urllib.request.urlopen(url)
-	jdata = json.load(jresponse);i=0;n=0
+	jdata = json.load(jresponse);i=0;n=0;pub=0
 	item_dict = jdata
 	llimit = xbmcaddon.Addon().getSetting('llimit')
 	hnight = xbmcaddon.Addon().getSetting('hnight')
@@ -70,6 +64,8 @@ def INDEX(url):
 		if cbclog >= 1:
 	    		xbmc.log('CBC Sports Index title: ' + str(title), xbmc.LOGINFO)
 	    		xbmc.log('CBC Sports Index URL: ' + str(url), xbmc.LOGINFO)
+		if cbclog == 2:
+	    		xbmc.log('CBC Sports Index jdata: ' + str(jdata), xbmc.LOGINFO)
 		onfirst = (jdata['schedule'][i]['on'][0])
 		if 'Hockey Night' in title and hnight == 'false':
 			i = i + 1
@@ -80,9 +76,11 @@ def INDEX(url):
 		badurl = jdata['schedule'][i]['url']
 		if '/sports' not in badurl and pubevents == 'true':
 			title = title + '  [COLOR blue](Published)[/COLOR]'
+			pub += 1
 		etime = jdata['schedule'][i]['stt']
 		sttime = jdata['schedule'][i]['end']
-		xbmc.log('Live event title: ' + str(i), xbmc.LOGDEBUG)
+		if cbclog >= 1:
+			xbmc.log('Live event title: ' + str(i), xbmc.LOGINFO)
 		try:
 			starttime = datetime.strptime(etime[:16],'%m/%d/%Y %H:%M')
 			endtime = datetime.strptime(sttime[:16],'%m/%d/%Y %H:%M')
@@ -100,7 +98,8 @@ def INDEX(url):
 			continue
 		etime = etime.split(' ',1)[-1].upper()
 		url = baseurl + jdata['schedule'][i]['url']
-		xbmc.log('Live event URL: ' + str(url), xbmc.LOGDEBUG)
+		if cbclog >= 1:
+		    xbmc.log('Live event URL: ' + str(url), xbmc.LOGINFO)
 		image = jdata['schedule'][i]['thumb']
 		if edate == now:
 			title = etime + ' - ' + title
@@ -112,6 +111,8 @@ def INDEX(url):
 			n = n+1			#  track number of items displayed
 		else:
 			break
+	if pubevents == 'true':
+	    xbmc.log('CBC Sports live events published: ' + str(pub) + ' of ' + str(n) + ' events.', xbmc.LOGINFO)
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
@@ -126,7 +127,7 @@ def IFRAME(name,url):
 	    return  
 	rdata = str(get_html(url))
 	#try: mediaId = re.compile("mediaId': '(.+?)'").findall(str(data))[0]
-	if cbclog >= 2:
+	if cbclog == 2:
 	    xbmc.log('CBC Sports rdata: ' + str(rdata), xbmc.LOGINFO)
 
 	try:					# primary mediaId parse
@@ -155,7 +156,7 @@ def IFRAME(name,url):
 	furl = basefeed + mediaId
 	jresponse = urllib.request.urlopen(furl)
 	jdata = json.load(jresponse)
-	if cbclog >= 1:
+	if cbclog == 2:
 	    xbmc.log('CBC Sports Live Schedule Playback response: ' + str(jdata), xbmc.LOGINFO)
 
 	try:
@@ -211,12 +212,15 @@ def IFRAME(name,url):
 #6
 def VIDEOS(url):
 	jresponse = urllib.request.urlopen(url)
+	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 	jdata = json.load(jresponse);i=0
-	#xbmc.log('CBC Sports videos data ' + str(jdata), xbmc.LOGDEBUG)
+	if cbclog >= 1:
+	    xbmc.log('CBC Sports VIDEOS name: ' + str(url), xbmc.LOGINFO)
+	if cbclog == 2:
+	    xbmc.log('CBC Sports VIDEOS data ' + str(jdata), xbmc.LOGINFO)
 	item_dict = jdata
 	count = len(item_dict['entries'])
 	for item in jdata['entries']:
-		#title = (jdata['entries'][i]['title']).encode('utf-8').replace('&amp;','&')
 		title = (jdata['entries'][i]['title'])
 		url = jdata['entries'][i]['content'][0]['url']
 		image = jdata['entries'][i]['defaultThumbnailUrl']
@@ -228,9 +232,8 @@ def VIDEOS(url):
 		vwidth = int(jdata['entries'][i]['content'][0]['width'])
 		#xbmc.log('CBC Sports Live Schedule stream aired ' + aired, xbmc.LOGINFO)
 		#xbmc.log('CBC Sports Live Schedule stream dplot ' + plot, xbmc.LOGINFO)
-		xbmc.log('CBC Sports Video height and width: ' + str(vheight) + ' '  + str(vwidth), xbmc.LOGINFO)
+		#xbmc.log('CBC Sports Video height and width: ' + str(vheight) + ' '  + str(vwidth), xbmc.LOGINFO)
 		addDir2(title, url, vduration, 7, image, aired, plot, vheight, vwidth);i=i+1
-	xbmc.log('url:' + str(url))
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 		
 
@@ -288,7 +291,9 @@ def get_html(url):
 	try:
 		response = urllib.request.urlopen(req)
 		code = response.getcode()
-		xbmc.log('CBC Sports Live Schedule stream response code: ' + str(code), xbmc.LOGDEBUG)
+		cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
+		if cbclog >= 1:
+			xbmc.log('CBC Sports get_html code: ' + str(code), xbmc.LOGINFO)
 		if code == 403:              
 			xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
 			sys.exit()
@@ -397,24 +402,16 @@ try:
 except:
 	pass
 
-xbmc.log("Mode: " + str(mode))
-xbmc.log("URL: " + str(url))
-xbmc.log("Name: " + str(name))
 
 if mode == None or url == None or len(url) < 1:
-	xbmc.log("CBC Sports Menu")
 	CATEGORIES()
 elif mode == 1:
-	xbmc.log("CBC Sports Live")
 	INDEX(url)
 elif mode == 2:
-	xbmc.log("CBC Sports Play Live Event")
 	IFRAME(name,url)
 elif mode == 6:
-	xbmc.log("CBC Sports Videos")
 	VIDEOS(url)
 elif mode == 7:
-	xbmc.log("CBC Sports Get Archive Stream")
 	GET_STREAM(name,url)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
