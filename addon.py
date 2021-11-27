@@ -182,11 +182,16 @@ def IFRAME(name,url):
 	    contents = BeautifulSoup(smil,'html5lib')
 	    if cbclog >= 1:
 	        xbmc.log('CBC Sports Live Schedule contents: ' + str(contents), xbmc.LOGINFO)
+	        xbmc.log('CBC Sports Live Schedule smil: ' + str(smil), xbmc.LOGINFO)
 					
 	    if 'GeoLocationBlocked' in str(contents):		#  Check for blackout
 	        xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
 	        iframe_return()
 	        return
+	    #if 'system-bitrate="0"' in str(contents):		#  Check for valid bitrate to see if started
+	    #    xbmcgui.Dialog().notification(name, translation(30013), defaultimage, notetime, False)
+	    #    iframe_return()
+	    #    return
 
 	try:
 	    if valid == 0:    
@@ -197,6 +202,7 @@ def IFRAME(name,url):
 
 	if stream != 'Not found':
 	    sdata = str(get_html(stream))
+	    xbmc.log('CBC Sports Live Schedule valid stream: ' + str(sdata), xbmc.LOGINFO)
 	else:
 	    iframe_return()
 	    return
@@ -208,10 +214,10 @@ def IFRAME(name,url):
 	    xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
 	    valid = 1
 
-	#if errfound > -1:
-	#	xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
-	#	valid = 1
-	#	return
+	if errfound > -1:
+		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
+		valid = 1
+		return
 
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports Live Schedule valid stream: ' + str(valid), xbmc.LOGINFO)
@@ -269,8 +275,16 @@ def GET_STREAM(name,url):
 	    xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
 	    iframe_return()
 	    return
-	if 'system-bitrate="0"' in str(contents):		#  Check for bad stream
-	    xbmcgui.Dialog().notification(name, translation(30002), defaultimage, notetime, False)
+	elif 'system-bitrate="0"' in str(contents):		#  Check for bad stream
+	    xbmcgui.Dialog().notification(name, translation(30013), defaultimage, notetime, False)
+	    iframe_return()
+	    return
+	elif 'system-bitrate="0"' in str(smil):			#  Check for bad stream
+	    xbmcgui.Dialog().notification(name, translation(30013), defaultimage, notetime, False)
+	    iframe_return()
+	    return
+	elif 'name="mediaDuration" value="0"' in str(smil):	#  Check for bad stream
+	    xbmcgui.Dialog().notification(name, translation(30013), defaultimage, notetime, False)
 	    iframe_return()
 	    return
 	stream = (re.compile('src="(.+?)"').findall(str(contents))[0])
