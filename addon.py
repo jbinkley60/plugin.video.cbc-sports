@@ -1,19 +1,20 @@
-import xbmcaddon, urllib.request, urllib.parse, urllib.error, xbmcgui, xbmcplugin, urllib.request, urllib.error, urllib.parse, re, sys
+import xbmcaddon, urllib.request, urllib.parse, urllib.error, xbmcgui, xbmcplugin, re, sys, os
 from bs4 import BeautifulSoup
 import html5lib
 import json
 from datetime import datetime, timedelta as td
 import time
 
+_addon = xbmcaddon.Addon()
+_addon_path = _addon.getAddonInfo('path')
+selfAddon = xbmcaddon.Addon(id='plugin.video.cbc-sports')
+sys.path.append(os.path.join( _addon_path, 'resources', 'lib' ) )
+translation = selfAddon.getLocalizedString
+import common
 
 now = (str(datetime.utcnow() - td(hours=5)).split(' ')[0]).replace('-','/')
 cbcnow = now.split('/')
 now = cbcnow[1] + '/' + cbcnow[2] + '/' + cbcnow[0]
-
-_addon = xbmcaddon.Addon()
-_addon_path = _addon.getAddonInfo('path')
-selfAddon = xbmcaddon.Addon(id='plugin.video.cbc-sports')
-translation = selfAddon.getLocalizedString
 
 defaultimage = 'special://home/addons/plugin.video.cbc-sports/resources/icon.png'
 defaultfanart = 'special://home/addons/plugin.video.cbc-sports/resources/fanart.jpg'
@@ -33,6 +34,8 @@ addon_handle = int(sys.argv[1])
 confluence_views = [500,501,502,503,504,508]
 plugin = 'CBC Sports'
 notetime = int(xbmcaddon.Addon().getSetting('notetime')) * 1000
+pubevents = xbmcaddon.Addon().getSetting('pubevents')
+cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 
 
 def CATEGORIES():
@@ -57,8 +60,6 @@ def INDEX(url):
 	item_dict = jdata
 	llimit = xbmcaddon.Addon().getSetting('llimit')
 	hnight = xbmcaddon.Addon().getSetting('hnight')
-	pubevents = xbmcaddon.Addon().getSetting('pubevents')
-	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 	count = len(item_dict['schedule'])
 	for item in jdata['schedule']:
 		title = (jdata['schedule'][i]['ti'])
@@ -77,18 +78,23 @@ def INDEX(url):
 		if '/sports' not in badurl and pubevents == 'true':
 			title = title + '  [COLOR blue](Published)[/COLOR]'
 			pub += 1
-		etime = jdata['schedule'][i]['stt']
-		sttime = jdata['schedule'][i]['end']
+		etime = common.timeConvert(jdata['schedule'][i]['stt'])		#  CHeck for properly formatted date / time
+		sttime = common.timeConvert(jdata['schedule'][i]['end'])
+		if etime == 'invalid' or sttime == 'invalid':
+		    i += 1
+		    xbmc.log('CBC Sports Index event skipped due to bad time format: ' + str(title), xbmc.LOGINFO)
+		    continue
 		if cbclog == 2:
 			xbmc.log('Live event title: ' + str(i), xbmc.LOGDEBUG)
 		try:
 			starttime = datetime.strptime(etime[:16],'%m/%d/%Y %H:%M')
 			endtime = datetime.strptime(sttime[:16],'%m/%d/%Y %H:%M')
-			iduration = (endtime - starttime).seconds
+			iduration = (endtime - starttime).seconds		
 		except TypeError:         #  Python bug when trying to do strptime twice
 			starttime = datetime(*(time.strptime(etime[:16],'%m/%d/%Y %H:%M')[0:6]))
 			endtime = datetime(*(time.strptime(sttime[:16],'%m/%d/%Y %H:%M')[0:6]))
 			iduration = (endtime - starttime).seconds
+			pass
 		#dtime = (etime.split(' ',1)[-1]).split(' ',1)[0]
 		edate = etime.split(' ',1)[0]
 		t1 = time.strptime(edate, "%m/%d/%Y")
@@ -118,20 +124,37 @@ def INDEX(url):
 
 #2
 def IFRAME(name,url):
-	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 	stream = 'Not found'
-	valid = 0; pmfound = 0
+	valid = 0; pmfound = 0; hnmediaid = '0'
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports Live Feed name: ' + str(name), xbmc.LOGINFO)
 	    xbmc.log('CBC Sports URL: ' + str(url), xbmc.LOGINFO)
 	if 'www.cbc.ca/sports' in url:		#  Check if valid URL is posted yet
 	    xbmcgui.Dialog().notification(name, translation(30320), defaultimage, notetime, False)
 	    iframe_return()	    
-	    return  
+	    return
+	if 'Hockey Night' in name:		#  Check for Hockey Night real URL
+		rdata = str(get_html(url))
+		if rdata == 'error':		#  Invalid HTML link
+		    if cbclog >= 1:
+		        xbmc.log('CBC Sports Hockey Night URL not posted yet.', xbmc.LOGINFO)
+		    iframe_return()
+		    return
+		hnurl = common.hnightUrl(name, rdata, cbclog)
+		if hnurl != '0':
+		    url = baseurl + '/' + hnurl
+		    if cbclog >= 1:    
+		        xbmc.log('CBC Sports Hockey Night URL: ' + str(url), xbmc.LOGINFO)  
 	rdata = str(get_html(url))
 	#try: mediaId = re.compile("mediaId': '(.+?)'").findall(str(data))[0]
 	if cbclog == 2:
 	    xbmc.log('CBC Sports rdata: ' + str(rdata), xbmc.LOGDEBUG)
+
+	if rdata == 'error':			#  Invalid HTML link
+	    iframe_return()
+	    if cbclog == 2:
+	        xbmc.log('CBC Sports rdata: ' + str(rdata), xbmc.LOGDEBUG)	    
+	    return 
 
 	try:					# primary mediaId parse
 	    if valid == 0:
@@ -160,13 +183,18 @@ def IFRAME(name,url):
 	except ValueError:
 	    xbmcgui.Dialog().notification(name, translation(30519), defaultimage, notetime, False)
 	    valid = 1				#  No valid mediaId found
+
+	#if cbclog >= 1 and pmfound == 1:
+	#    xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGINFO)
+	#elif cbclog >= 1 and hnmediaid != '0':
+	#    xbmc.log('CBC Sports Hockey Night mediaId: ' + mediaId, xbmc.LOGINFO)
 	
-	if valid == 0:	    
+	if valid == 0:    
 	    furl = basefeed + mediaId
 	    jresponse = urllib.request.urlopen(furl)
 	    jdata = json.load(jresponse)
-	if cbclog == 2:
-	    xbmc.log('CBC Sports Live Schedule Playback response: ' + str(jdata), xbmc.LOGDEBUG)
+	    if cbclog == 2:
+	        xbmc.log('CBC Sports Live Schedule Playback response: ' + str(jdata), xbmc.LOGINFO)
 
 	try:
 	    if valid == 0:
@@ -179,9 +207,15 @@ def IFRAME(name,url):
 
 	if valid == 0:	  
 	    smil = get_html(smil_url)
+	    if smil == 'error':			#  Invalid HTML link
+	        iframe_return()
+	        if cbclog >= 1:
+	            xbmc.log('CBC Sports Live Schedule smil: ' + str(smil), xbmc.LOGINFO)	    
+	        return 
 	    contents = BeautifulSoup(smil,'html5lib')
 	    if cbclog >= 1:
 	        xbmc.log('CBC Sports Live Schedule contents: ' + str(contents), xbmc.LOGINFO)
+	        xbmc.log('CBC Sports Live Schedule smil: ' + str(smil), xbmc.LOGINFO)
 					
 	    if 'GeoLocationBlocked' in str(contents):		#  Check for blackout
 	        xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
@@ -197,6 +231,10 @@ def IFRAME(name,url):
 
 	if stream != 'Not found':
 	    sdata = str(get_html(stream))
+	    xbmc.log('CBC Sports Live Schedule valid stream Not Foound: ' + str(name) + ' ' + str(sdata), xbmc.LOGINFO)
+	    if sdata == 'error':			#  Invalid HTML link
+	        iframe_return()
+	        return
 	else:
 	    iframe_return()
 	    return
@@ -208,10 +246,10 @@ def IFRAME(name,url):
 	    xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
 	    valid = 1
 
-	#if errfound > -1:
-	#	xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
-	#	valid = 1
-	#	return
+	if errfound > -1:
+		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
+		valid = 1
+		return
 
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports Live Schedule valid stream: ' + str(valid), xbmc.LOGINFO)
@@ -228,12 +266,11 @@ def IFRAME(name,url):
 #6
 def VIDEOS(url):
 	jresponse = urllib.request.urlopen(url)
-	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 	jdata = json.load(jresponse);i=0
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports VIDEOS name: ' + str(url), xbmc.LOGINFO)
 	if cbclog == 2:
-	    xbmc.log('CBC Sports VIDEOS data ' + str(jdata), xbmc.LOGINFO)
+	    xbmc.log('CBC Sports VIDEOS data ' + str(jdata), xbmc.LOGDEBUG)
 	item_dict = jdata
 	count = len(item_dict['entries'])
 	for item in jdata['entries']:
@@ -243,25 +280,32 @@ def VIDEOS(url):
 		vduration = int(jdata['entries'][i]['content'][0]['duration'])
 		pubDate = jdata['entries'][i]['pubDate']
 		aired = datetime.fromtimestamp(pubDate / 1000).strftime('%Y-%m-%d')
+		comp_aired = time.strptime(aired, "%Y-%m-%d")
+		comp_now = time.strptime(now, "%m/%d/%Y")
+		if comp_aired > comp_now:
+		    title = title + '  [COLOR blue](Future)[/COLOR]'
 		plot = jdata['entries'][i]['description']
 		vheight = int(jdata['entries'][i]['content'][0]['height'])
 		vwidth = int(jdata['entries'][i]['content'][0]['width'])
 		#xbmc.log('CBC Sports Live Schedule stream aired ' + aired, xbmc.LOGINFO)
 		#xbmc.log('CBC Sports Live Schedule stream dplot ' + plot, xbmc.LOGINFO)
 		#xbmc.log('CBC Sports Video height and width: ' + str(vheight) + ' '  + str(vwidth), xbmc.LOGINFO)
+		#xbmc.log('CBC Sports Videos now and aired: ' + str(now) + ' ' + str(daired), xbmc.LOGINFO)
 		addDir2(title, url, vduration, 7, image, aired, plot, vheight, vwidth);i=i+1
 	xbmcplugin.endOfDirectory(int(sys.argv[1]))
 		
 
 #7
 def GET_STREAM(name,url):
-	cbclog = int(xbmcaddon.Addon().getSetting('cbclog'))
 	valid = 0
 	smil = get_html(url)
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports GET_STREAM name: ' + str(name), xbmc.LOGINFO)
 	    xbmc.log('CBC Sports URL: ' + str(url), xbmc.LOGINFO)
 	    xbmc.log('CBC Sports smil: ' + str(smil), xbmc.LOGINFO)
+	if smil == 'error':					#  Invalid HTML link
+	    iframe_return()
+	    return
 	contents = BeautifulSoup(smil,'html5lib')
 	if cbclog >= 1:
 	    xbmc.log('CBC Sports GET_STREAM contents: ' + str(contents), xbmc.LOGINFO)
@@ -269,8 +313,8 @@ def GET_STREAM(name,url):
 	    xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
 	    iframe_return()
 	    return
-	if 'system-bitrate="0"' in str(contents):		#  Check for bad stream
-	    xbmcgui.Dialog().notification(name, translation(30002), defaultimage, notetime, False)
+	elif 'name="mediaDuration" value="0"' in str(contents):	#  Check for bad stream
+	    xbmcgui.Dialog().notification(name, translation(30013), defaultimage, notetime, False)
 	    iframe_return()
 	    return
 	stream = (re.compile('src="(.+?)"').findall(str(contents))[0])
@@ -291,11 +335,10 @@ def play(url):
 	item = xbmcgui.ListItem(path=url)
 	return xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
-def iframe_return():
+def iframe_return():			#  iframe return unavailable URL                
 	listitem = xbmcgui.ListItem(name, path=unavailableurl)
 	listitem.setArt({'thumb': defaultimage, 'icon': defaultimage})
 	xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, listitem)
-		
 
 def striphtml(data):
 	p = re.compile(r'<.*?>')
@@ -324,15 +367,18 @@ def get_html(url):
 			xbmc.log('CBC Sports get_html code: ' + str(code), xbmc.LOGINFO)
 		if code == 403:              
 			xbmcgui.Dialog().notification(name, translation(30001), defaultimage, notetime, False)
-			sys.exit()
+			html = 'error'
+			#sys.exit()
 		elif code == 22:              
 			xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
-			sys.exit()	    
+			html = 'error'
+			#sys.exit()	    
 		html = response.read()
 		response.close()
 	except urllib.error.URLError:              
 		xbmcgui.Dialog().notification(name, translation(30010), defaultimage, notetime, False)
-		sys.exit()	 
+		html = 'error'
+		#sys.exit()	 
 	return html
 
 
@@ -411,7 +457,7 @@ def unescape(s):
 	p = htmllib.HTMLParser(None)
 	p.save_bgn()
 	p.feed(s)
-	return p.save_end()	
+	return p.save_end()
 
 
 params = get_params()
@@ -419,6 +465,7 @@ url = None
 name = None
 mode = None
 cookie = None
+common.logging_level(cbclog)
 
 try:
 	url = urllib.parse.unquote_plus(params["url"])

@@ -125,7 +125,7 @@ msgid "The number of Archive items to display."
 msgstr ""
 
 msgctxt "#30518"
-msgid "Log responses from CBC Sports website for troubleshooting.  The default is off."
+msgid "Log responses from CBC Sports website for troubleshooting.  The default is off.  Detailed requires Kodi to be in debug mode."
 msgstr ""
 
 msgctxt "#30519"
