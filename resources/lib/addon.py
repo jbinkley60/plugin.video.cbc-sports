@@ -77,7 +77,7 @@ def INDEX(url):
 		if '/sports' not in badurl and pubevents == 'true':
 			title = title + '  [COLOR blue](Published)[/COLOR]'
 			pub += 1
-		etime = common.timeConvert(jdata['schedule'][i]['stt'])		#  CHeck for properly formatted date / time
+		etime = common.timeConvert(jdata['schedule'][i]['stt'])		#  Check for properly formatted date / time
 		sttime = common.timeConvert(jdata['schedule'][i]['end'])
 		if etime == 'invalid' or sttime == 'invalid':
 		    i += 1
@@ -182,11 +182,6 @@ def IFRAME(name,url):
 	except ValueError:
 	    xbmcgui.Dialog().notification(name, translation(30519), defaultimage, notetime, False)
 	    valid = 1				#  No valid mediaId found
-
-	#if cbclog >= 1 and pmfound == 1:
-	#    xbmc.log('CBC Sports mediaId: ' + mediaId, xbmc.LOGINFO)
-	#elif cbclog >= 1 and hnmediaid != '0':
-	#    xbmc.log('CBC Sports Hockey Night mediaId: ' + mediaId, xbmc.LOGINFO)
 	
 	if valid == 0:    
 	    furl = basefeed + mediaId
@@ -270,6 +265,7 @@ def VIDEOS(url):
 	    xbmc.log('CBC Sports VIDEOS name: ' + str(url), xbmc.LOGINFO)
 	if cbclog == 2:
 	    xbmc.log('CBC Sports VIDEOS data ' + str(jdata), xbmc.LOGDEBUG)
+	    #xbmc.log('CBC Sports VIDEOS data ' + str(jdata), xbmc.LOGINFO)
 	item_dict = jdata
 	count = len(item_dict['entries'])
 	for item in jdata['entries']:
